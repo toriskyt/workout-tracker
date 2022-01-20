@@ -30,7 +30,23 @@ router.put("/api/workouts/:id", async function (req, res) {
 })
 
 router.get("/api/workouts/range", function (req, res) {
-    // this is meant to send back the last seven workouts
+    Workout.aggregate([
+        {
+            $addFields: {
+                totalDuration: {
+                    $sum: "$exercises.duration"
+                },
+                totalWeight: {
+                    $sum: "$exercises.weight"
+                }
+            }
+        }
+    ])
+        .sort({ day: "desc" })
+        .limit(7)
+        .sort({ day: "asc" })
+        .then(dbData => { res.json(dbData) })
+        .catch(err => res.json(err))
 })
 
 module.exports = router;
